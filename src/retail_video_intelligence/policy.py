@@ -1,4 +1,4 @@
-"""Políticas no negociables del MVP."""
+"""Non-negotiable MVP policies."""
 
 PROHIBITED_CAPABILITIES = frozenset(
     {
@@ -11,6 +11,6 @@ PROHIBITED_CAPABILITIES = frozenset(
 
 
 def assert_capability_allowed(capability: str) -> None:
-    """Rechaza explícitamente capacidades prohibidas por el ADR de privacidad."""
+    """Explicitly reject capabilities prohibited by the privacy ADR."""
     if capability.strip().lower() in PROHIBITED_CAPABILITIES:
-        raise ValueError(f"capacidad prohibida en el MVP: {capability}")
+        raise ValueError(f"capability prohibited in the MVP: {capability}")

@@ -1,34 +1,34 @@
 # Retail Video Intelligence
 
-Scaffold mínimo para un MVP **on-premise** de analítica de CCTV orientada a retail. El repositorio no contiene un NVR, modelos, pesos ni procesamiento de vídeo real: define los límites, el dominio y una ruta de integración verificable sin red, GPU ni descargas.
+A minimal scaffold for an **on-premises** retail CCTV analytics MVP. The repository contains no NVR, models, weights, or actual video processing: it defines boundaries, the domain model, and a verifiable integration path that requires no network, GPU, or downloads.
 
-## Alcance del MVP
+## MVP scope
 
-Flujo previsto:
+Planned flow:
 
-1. **Frigate + go2rtc (externos)** reciben cámaras y administran grabaciones/streams.
-2. Este servicio importa referencias a grabaciones y normaliza eventos.
-3. **RF-DETR exportado a ONNX/OpenVINO** será el detector (adaptador pendiente).
-4. Un tracker efímero asociará detecciones solo durante una sesión corta.
-5. **SigLIP 2** generará embeddings para búsqueda semántica (adaptador pendiente).
-6. PostgreSQL + pgvector almacenará eventos y embeddings.
+1. **Frigate + go2rtc (external)** receive camera feeds and manage recordings/streams.
+2. This service imports recording references and normalizes events.
+3. **RF-DETR exported to ONNX/OpenVINO** will be the detector (adapter pending).
+4. An ephemeral tracker will associate detections only during a short session.
+5. **SigLIP 2** will generate embeddings for semantic search (adapter pending).
+6. PostgreSQL + pgvector will store events and embeddings.
 
-Este scaffold implementa únicamente configuración, modelos de dominio y una CLI de smoke test. No afirma que detección, tracking, embeddings ni conexión con Frigate estén implementados.
+This scaffold implements only configuration, domain models, and a smoke-test CLI. It does not claim that detection, tracking, embeddings, or a Frigate connection are implemented.
 
-## Guardrails obligatorios
+## Mandatory guardrails
 
-El MVP **prohíbe**:
+The MVP **prohibits**:
 
-- reconocimiento o identificación facial;
-- inferencia de emociones o estados sensibles;
-- lectura automática de matrículas;
-- reidentificación persistente de personas entre cámaras o sesiones.
+- facial recognition or identification;
+- inference of emotions or sensitive states;
+- automatic license plate recognition;
+- persistent re-identification of people across cameras or sessions.
 
-El tracking será efímero y sus identificadores no tendrán significado fuera de la sesión de procesamiento. Véase [ADR-0001](docs/adr/0001-licencias-privacidad.md).
+Tracking will be ephemeral, and its identifiers will have no meaning outside the processing session. See [ADR-0001](docs/adr/0001-licensing-privacy.md).
 
-## Inicio rápido (sin red, GPU ni modelos)
+## Quick start (no network, GPU, or models)
 
-Requiere Python 3.11+.
+Requires Python 3.11+.
 
 ```bash
 python3 -m venv .venv
@@ -38,26 +38,26 @@ rvi smoke
 python -m unittest discover -s tests -v
 ```
 
-Alternativa sin instalar el paquete:
+Alternatively, without installing the package:
 
 ```bash
 PYTHONPATH=src python -m retail_video_intelligence smoke
 PYTHONPATH=src python -m unittest discover -s tests -v
 ```
 
-El smoke test valida configuración y guardrails; no abre conexiones ni descarga artefactos.
+The smoke test validates configuration and guardrails; it opens no connections and downloads no artifacts.
 
 ## PostgreSQL + pgvector
 
 ```bash
 cp .env.example .env
-# Cambiar las credenciales antes de un entorno compartido.
+# Change the credentials before using a shared environment.
 docker compose up -d postgres
 ```
 
-El compose inicia solamente PostgreSQL con pgvector. No incluye Frigate, go2rtc ni este servicio. Para la integración prevista, Frigate debe permanecer desplegado y gestionado externamente; este servicio consumirá referencias a grabaciones/eventos mediante un adaptador explícito, con acceso mínimo y sin copiar su código.
+The Compose configuration starts only PostgreSQL with pgvector. It does not include Frigate, go2rtc, or this service. For the planned integration, Frigate must remain deployed and managed externally; this service will consume recording/event references through an explicit adapter, with minimal access and without copying its code.
 
-## Desarrollo
+## Development
 
 ```bash
 make smoke
@@ -65,8 +65,8 @@ make test
 make lint
 ```
 
-`make lint` usa `ruff` si está instalado y siempre valida que los módulos compilen. La arquitectura y las decisiones abiertas están en [`docs/architecture.md`](docs/architecture.md).
+`make lint` uses `ruff` when installed and always validates that the modules compile. The architecture and open decisions are documented in [`docs/architecture.md`](docs/architecture.md).
 
-## Licencia
+## License
 
-**Pendiente de decisión.** Este repositorio no concede todavía una licencia de uso o redistribución; consulte [`LICENSE`](LICENSE) y el ADR antes de incorporar dependencias/modelos.
+**Pending a decision.** This repository does not yet grant a license to use or redistribute the software; consult [`LICENSE`](LICENSE) and the ADR before adding dependencies or models.

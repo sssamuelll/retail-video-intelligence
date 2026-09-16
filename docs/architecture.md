@@ -1,60 +1,60 @@
-# Arquitectura del MVP
+# MVP Architecture
 
-## Contexto y límites
+## Context and boundaries
 
-El sistema se ejecutará on-premise. **Frigate/go2rtc es una dependencia externa**, no un componente copiado, embebido ni desplegado por este repositorio. Su responsabilidad es ingerir cámaras, mantener streams y grabaciones y publicar eventos/referencias. La configuración operativa de cámaras y credenciales queda fuera de este código.
+The system will run on-premises. **Frigate/go2rtc is an external dependency**, not a component copied, embedded, or deployed by this repository. It is responsible for ingesting camera feeds, maintaining streams and recordings, and publishing events/references. Operational configuration for cameras and credentials remains outside this codebase.
 
-## Flujo previsto
+## Planned flow
 
 ```text
-Cámaras -> Frigate/go2rtc externo -> referencia a grabación/evento
-                                      |
-                                      v
-                           importador/normalizador propio
-                                      |
-                    +-----------------+------------------+
-                    |                                    |
-          RF-DETR (ONNX/OpenVINO)             metadatos normalizados
-                    |
-            tracking efímero
-                    |
-            recortes permitidos -> SigLIP 2 -> pgvector/PostgreSQL
+Cameras -> external Frigate/go2rtc -> recording/event reference
+                                         |
+                                         v
+                              custom importer/normalizer
+                                         |
+                       +-----------------+------------------+
+                       |                                    |
+             RF-DETR (ONNX/OpenVINO)              normalized metadata
+                       |
+               ephemeral tracking
+                       |
+               permitted crops -> SigLIP 2 -> pgvector/PostgreSQL
 ```
 
-Los bloques de inferencia son **previstos, no implementados**. No se descargan pesos y el contrato futuro deberá aceptar rutas locales a artefactos revisados.
+The inference blocks are **planned, not implemented**. No weights are downloaded, and the future contract must accept local paths to reviewed artifacts.
 
-## Componentes
+## Components
 
-- `domain.py`: eventos, detecciones y referencias a grabaciones independientes del proveedor.
-- `config.py`: configuración desde variables de entorno, sin efectuar conexiones.
-- `cli.py`: smoke test local de configuración y políticas.
-- PostgreSQL/pgvector: único servicio del compose, para persistencia futura.
-- Adaptador Frigate (pendiente): importará referencias y normalizará timestamps/cámaras/tipos; no asumirá acceso directo a cámaras.
-- Adaptadores RF-DETR/SigLIP 2 (pendientes): inferencia local, artefactos fijados y auditados, sin descarga implícita.
-- Tracker (pendiente): memoria acotada a una sesión, sin identidad persistente.
+- `domain.py`: provider-independent events, detections, and recording references.
+- `config.py`: configuration from environment variables, without making connections.
+- `cli.py`: local smoke test for configuration and policies.
+- PostgreSQL/pgvector: the only Compose service, for future persistence.
+- Frigate adapter (pending): will import references and normalize timestamps/cameras/types; it will not assume direct camera access.
+- RF-DETR/SigLIP 2 adapters (pending): local inference with pinned, audited artifacts and no implicit downloads.
+- Tracker (pending): memory limited to one session, with no persistent identity.
 
-## Principios de datos
+## Data principles
 
-- Minimización: persistir eventos y embeddings estrictamente necesarios.
-- Retención configurable; borrado automático pendiente de implementación.
-- Separar identificadores de cámara/evento de identidades humanas.
-- No almacenar biometría ni construir perfiles de personas.
-- Logs sin fotogramas, credenciales ni URLs firmadas.
+- Minimization: persist only strictly necessary events and embeddings.
+- Configurable retention; automatic deletion is pending implementation.
+- Keep camera/event identifiers separate from human identities.
+- Do not store biometric data or build profiles of people.
+- Logs must contain no frames, credentials, or signed URLs.
 
-## Preflight de soluciones existentes
+## Existing-solutions preflight
 
-Evaluación ligera basada en documentación/conocimiento del ecosistema, sin instalar servicios:
+A lightweight evaluation based on documentation and ecosystem knowledge, without installing services:
 
-- **Frigate/go2rtc**: solución mantenida y especializada en ingestión/NVR; se reutiliza externamente en vez de reconstruir RTSP, grabación y restreaming.
-- **ONNX Runtime/OpenVINO**: backends maduros para inferencia local; la elección concreta se validará con hardware objetivo y exportación RF-DETR.
-- **PostgreSQL/pgvector**: evita introducir una base vectorial separada en el MVP y permite filtros transaccionales junto a embeddings.
-- **Trackers existentes** (ByteTrack/OC-SORT): candidatos a evaluar; no se selecciona ni integra uno todavía para mantener el tracking efímero y mínimo.
+- **Frigate/go2rtc**: a maintained solution specialized in ingestion/NVR; reuse it externally instead of rebuilding RTSP, recording, and restreaming.
+- **ONNX Runtime/OpenVINO**: mature backends for local inference; validate the specific choice against target hardware and the RF-DETR export.
+- **PostgreSQL/pgvector**: avoids introducing a separate vector database in the MVP and supports transactional filters alongside embeddings.
+- **Existing trackers** (ByteTrack/OC-SORT): candidates for evaluation; none is selected or integrated yet, preserving minimal, ephemeral tracking.
 
-## Decisiones pendientes
+## Pending decisions
 
-1. Licencia del repositorio y compatibilidad de licencias/pesos de RF-DETR y SigLIP 2.
-2. Versión/exportación exacta de modelos, dimensiones de embeddings y backend por hardware.
-3. Contrato de importación con Frigate (API, webhook o filesystem controlado).
-4. Esquema SQL/migraciones, políticas de retención y borrado verificable.
-5. Tracker, umbrales y métricas sobre datos representativos y autorizados.
-6. Autenticación, cifrado, observabilidad y operación de backups.
+1. Repository license and license/weight compatibility for RF-DETR and SigLIP 2.
+2. Exact model versions/exports, embedding dimensions, and hardware-specific backend.
+3. Frigate import contract (API, webhook, or controlled filesystem).
+4. SQL schema/migrations, retention policies, and verifiable deletion.
+5. Tracker, thresholds, and metrics using representative, authorized data.
+6. Authentication, encryption, observability, and backup operations.

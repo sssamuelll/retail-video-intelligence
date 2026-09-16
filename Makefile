@@ -8,4 +8,4 @@ test:
 
 lint:
 	python3 -m compileall -q src tests
-	@if command -v ruff >/dev/null 2>&1; then ruff check .; else echo "ruff no instalado; compileall correcto"; fi
+	@if command -v ruff >/dev/null 2>&1; then ruff check .; else echo "ruff is not installed; compileall passed"; fi

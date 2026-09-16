@@ -1,4 +1,4 @@
-"""Modelos de dominio sin dependencias de infraestructura."""
+"""Domain models without infrastructure dependencies."""
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -22,11 +22,11 @@ class RecordingRef:
 
     def __post_init__(self) -> None:
         if not self.camera_id.strip():
-            raise ValueError("camera_id no puede estar vacío")
+            raise ValueError("camera_id cannot be empty")
         if self.starts_at.tzinfo is None or self.ends_at.tzinfo is None:
-            raise ValueError("los timestamps deben incluir zona horaria")
+            raise ValueError("timestamps must include a time zone")
         if self.ends_at <= self.starts_at:
-            raise ValueError("ends_at debe ser posterior a starts_at")
+            raise ValueError("ends_at must be later than starts_at")
 
 
 @dataclass(frozen=True, slots=True)
@@ -39,9 +39,9 @@ class BoundingBox:
     def __post_init__(self) -> None:
         values = (self.x_min, self.y_min, self.x_max, self.y_max)
         if not all(0.0 <= value <= 1.0 for value in values):
-            raise ValueError("las coordenadas deben estar normalizadas entre 0 y 1")
+            raise ValueError("coordinates must be normalized between 0 and 1")
         if self.x_min >= self.x_max or self.y_min >= self.y_max:
-            raise ValueError("bounding box inválido")
+            raise ValueError("invalid bounding box")
 
 
 @dataclass(frozen=True, slots=True)
@@ -53,9 +53,9 @@ class Detection:
 
     def __post_init__(self) -> None:
         if not self.label.strip():
-            raise ValueError("label no puede estar vacío")
+            raise ValueError("label cannot be empty")
         if not 0.0 <= self.confidence <= 1.0:
-            raise ValueError("confidence debe estar entre 0 y 1")
+            raise ValueError("confidence must be between 0 and 1")
 
 
 @dataclass(frozen=True, slots=True)
@@ -69,9 +69,9 @@ class NormalizedEvent:
 
     def __post_init__(self) -> None:
         if not self.camera_id.strip():
-            raise ValueError("camera_id no puede estar vacío")
+            raise ValueError("camera_id cannot be empty")
         if self.occurred_at.tzinfo is None:
-            raise ValueError("occurred_at debe incluir zona horaria")
+            raise ValueError("occurred_at must include a time zone")
 
     @classmethod
     def now(cls, camera_id: str, kind: EventKind) -> "NormalizedEvent":

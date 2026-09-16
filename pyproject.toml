@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "retail-video-intelligence"
 version = "0.1.0"
-description = "Scaffold on-premise para normalización y búsqueda de eventos CCTV"
+description = "On-premises scaffold for CCTV event normalization and search"
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "LicenseRef-Pending"}

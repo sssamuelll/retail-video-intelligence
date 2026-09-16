@@ -1,4 +1,4 @@
-"""CLI local que no abre red ni inicializa aceleradores."""
+"""Local CLI that does not open network connections or initialize accelerators."""
 
 import argparse
 import json
@@ -25,7 +25,7 @@ def smoke() -> dict[str, object]:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="rvi")
     subparsers = parser.add_subparsers(dest="command", required=True)
-    subparsers.add_parser("smoke", help="valida configuración y políticas localmente")
+    subparsers.add_parser("smoke", help="validate configuration and policies locally")
     return parser
 
 
